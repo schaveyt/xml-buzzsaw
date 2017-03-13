@@ -4,6 +4,6 @@
         "obj": true,
         "node_modules/": true,
         "**/._*": true,
-        ".tmp": true
+        ".tmp": true,
     }
 }
