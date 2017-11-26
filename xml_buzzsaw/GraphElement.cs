@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace xml_buzzsaw
 {
-    public class GraphXmlElement
+    public class GraphElement
     {
         #region Fields
 
@@ -23,14 +23,14 @@ namespace xml_buzzsaw
         /// </summary>
         private Dictionary<string, List<string>> _outReferenceIdentifiers;
 
-        private readonly ConcurrentDictionary<string, GraphXmlElement> _children =
-            new ConcurrentDictionary<string, GraphXmlElement>();
+        private readonly ConcurrentDictionary<string, GraphElement> _children =
+            new ConcurrentDictionary<string, GraphElement>();
 
-        private readonly ConcurrentDictionary<string, List<GraphXmlElement>> _incomingElements =
-        new ConcurrentDictionary<string, List<GraphXmlElement>>();
+        private readonly ConcurrentDictionary<string, List<GraphElement>> _incomingElements =
+        new ConcurrentDictionary<string, List<GraphElement>>();
 
-        private readonly ConcurrentDictionary<string, List<GraphXmlElement>> _outgoingElements =
-            new ConcurrentDictionary<string, List<GraphXmlElement>>();
+        private readonly ConcurrentDictionary<string, List<GraphElement>> _outgoingElements =
+            new ConcurrentDictionary<string, List<GraphElement>>();
 
         private SortedList<string, string> _attributes = new SortedList<string, string>();
 
@@ -50,7 +50,7 @@ namespace xml_buzzsaw
 
         public string ParentId { get; set; }
 
-        public GraphXmlElement Parent { get; set; }
+        public GraphElement Parent { get; set; }
 
         public List<string> ChildrenIdenifiers
         {
@@ -88,7 +88,7 @@ namespace xml_buzzsaw
             }
         }
 
-        public ConcurrentDictionary<string, GraphXmlElement> Children
+        public ConcurrentDictionary<string, GraphElement> Children
         {
             get
             {
@@ -96,7 +96,7 @@ namespace xml_buzzsaw
             }
         }
 
-        public ConcurrentDictionary<string, List<GraphXmlElement>> IncomingElements
+        public ConcurrentDictionary<string, List<GraphElement>> IncomingElements
         {
             get
             {
@@ -104,7 +104,7 @@ namespace xml_buzzsaw
             }
         }
 
-        public ConcurrentDictionary<string, List<GraphXmlElement>> OutgoingElements
+        public ConcurrentDictionary<string, List<GraphElement>> OutgoingElements
         {
             get
             {
@@ -124,33 +124,33 @@ namespace xml_buzzsaw
 
         #region Methods
 
-        public void AddInReference(string referenceType, GraphXmlElement element)
+        public void AddInReference(string referenceType, GraphElement element)
         {
-            List<GraphXmlElement> list;
+            List<GraphElement> list;
             if(!_incomingElements.TryGetValue(referenceType, out list))
             {
-                list = new List<GraphXmlElement>();
+                list = new List<GraphElement>();
                 _incomingElements.GetOrAdd(referenceType, list);
             }
 
             list.Add(element);
         }
 
-        public void AddOutReference(string referenceType, GraphXmlElement element)
+        public void AddOutReference(string referenceType, GraphElement element)
         {
-            List<GraphXmlElement> list;
+            List<GraphElement> list;
             if(!_outgoingElements.TryGetValue(referenceType, out list))
             {
-                list = new List<GraphXmlElement>();
+                list = new List<GraphElement>();
                 _outgoingElements.GetOrAdd(referenceType, list);
             }
 
             list.Add(element);
         }
 
-        public void RemoveInReference(string referenceType, GraphXmlElement element)
+        public void RemoveInReference(string referenceType, GraphElement element)
         {
-            List<GraphXmlElement> list;
+            List<GraphElement> list;
             if (!_incomingElements.TryGetValue(referenceType, out list))
             {
                 return;
@@ -159,9 +159,9 @@ namespace xml_buzzsaw
             list.Remove(element);
         }
 
-        public void RemoveOutReference(string referenceType, GraphXmlElement element)
+        public void RemoveOutReference(string referenceType, GraphElement element)
         {
-            List<GraphXmlElement> list;
+            List<GraphElement> list;
             if (!_outgoingElements.TryGetValue(referenceType, out list))
             {
                 return;

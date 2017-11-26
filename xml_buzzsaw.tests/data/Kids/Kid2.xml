@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<Person Name="Marcia Brady" Guid="abc-123">
+    <Mother_Ref RefGuid="asdf-mna9-8f4p" Dir="In"/>
+    <Father_Ref RefGuid="dod0e-oe948" Dir="In"/>
+</Person>

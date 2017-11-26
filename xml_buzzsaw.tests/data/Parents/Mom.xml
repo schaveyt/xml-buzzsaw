@@ -1,0 +1,4 @@
+<?xml version="1.0"?>
+<Person Name="Carol Brady" Guid="asdf-mna9-8f4p">
+    <Employee_Ref RefGuid="sdfo-lsdf-89e4i" Dir="Out" Type="Housekeeper"/>
+</Person>

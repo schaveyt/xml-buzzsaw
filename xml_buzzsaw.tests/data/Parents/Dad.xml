@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<Person Name="Mike Brady" Guid="dod0e-oe948">
+    <Married_Ref RefGuid="asdf-mna9-8f4p9" Dir="Out"/>
+    <Mother_Ref RefGuid="xyz-999" Dir="In"/>
+    <Father_Ref RefGuid="abc-123" Dir="In"/>
+    <Employee_Ref RefGuid="sdfo-lsdf-89e4i" Dir="Out" Type="Housekeeper"/>
+</Person>
+
+
+Greg Brady
+Marcia Brady
+Peter Brady
+Jan Brady
+Bobby Brady
+Cindy Brady
