@@ -1,4 +1,4 @@
 <?xml version="1.0"?>
 <Person Name="Papa John's" Guid="abc-123">
-    <Married_Ref RefGuid="xyz-999" Dir="Out">
+    <Married_Ref RefGuid="xyz-999" Dir="Out" />
 </Person>

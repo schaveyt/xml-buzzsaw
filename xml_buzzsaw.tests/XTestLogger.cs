@@ -1,15 +1,15 @@
-using System;
-using System.Diagnostics;
+using xml_buzzsaw.utils;
+using Xunit.Abstractions;
 
-namespace xml_buzzsaw.utils
+namespace xml_buzzsaw.tests
 {
-    public class SimpleLogger : ILogger
+    internal class XTestLogger : ILogger
     {
-        private string _context;
+        private readonly ITestOutputHelper _output;
 
-        public SimpleLogger(string context)
+        internal XTestLogger(ITestOutputHelper output)
         {
-            _context = context;
+            _output = output;
         }
 
         public void Info(string msg_id, string msg)
@@ -29,7 +29,8 @@ namespace xml_buzzsaw.utils
 
         private void Base(string level, string msg_id, string msg)
         {
-            Console.WriteLine($"{level} - {_context}: {msg_id} - {msg}");
+            _output.WriteLine($"{level}: {msg_id} - {msg}");
         }
     }
+
 }

@@ -75,19 +75,19 @@ namespace xml_buzzsaw
 
         #region Methods
 
-        public bool Load(string topLevelFolder, out string error, bool forceReload = false)
-        {
-            error = String.Empty;
+        #region Load and Supporting Methods
 
+        public bool Load(string topLevelFolder, bool forceReload = false)
+        {
             if (String.IsNullOrWhiteSpace(topLevelFolder))
             {
-                error = "The provided top level folder is either null or only whitespace.";
+                _logger.Error("3959", "The provided top level folder is either null or only whitespace.");
                 return false;
             }
 
             if (!Directory.Exists(topLevelFolder))
             {
-                error = $"The specified folder does not exist: {topLevelFolder}.";
+                 _logger.Error("4089", $"The specified folder does not exist: {topLevelFolder}.");
                 return false;
             }
 
@@ -99,6 +99,10 @@ namespace xml_buzzsaw
                 return true;
             }
 
+            // Reset all cached state
+            //
+            Reset();
+
             //
             // Now start the loading process
             //
@@ -108,19 +112,18 @@ namespace xml_buzzsaw
             //
             SetupFileSystemWatchers(topLevelFolder);
 
-            // Reset all cached state
-            //
-            Reset();
-
             try
             {
                 // Translate the xml to elements and add them to the cache.
                 //
-                XmlToGraphTranslator.TranslateToCache(topLevelFolder, _elementsByIdCollection);
+                if (!XmlToGraphTranslator.TranslateToCache(_logger, topLevelFolder, _elementsByIdCollection))
+                {
+                    return false;
+                }
 
-                 // In parallel, apply the Resolve method to each of the cached elements.
-                 //
-                 ParallelUtils.ForEach(_logger, _elementsByIdCollection, Resolve);
+                // In parallel, apply the Resolve method to each of the cached elements.
+                //
+                ParallelUtils.ForEach(_logger, _elementsByIdCollection, Resolve);
             }
             catch (Exception e)
             {
@@ -168,21 +171,6 @@ namespace xml_buzzsaw
             FsWatcher.EnableRaisingEvents = true;
         }
 
-        private void Reset()
-        {
-            // The pattern of clearing, set to null, then re-initialize is to
-            // elevate this variable as eligble for garbage collection
-            //
-            if (_elementsByIdCollection != null)
-            {
-                _elementsByIdCollection.Clear();
-            }
-            _elementsByIdCollection = null;
-            _elementsByIdCollection = new ConcurrentDictionary<string, GraphElement>();
-        }
-
-        #region Cache Resolvers
-
         private void Resolve(GraphElement element)
         {
             ResolveChildren(element);
@@ -214,29 +202,65 @@ namespace xml_buzzsaw
         {
             foreach (var entry in element.InRefernceIdentifiers)
             {
+                // Type is the _Ref xml element minus the _Ref. (e.g. <Mother_Ref> => Mother)
+                //
+                var referenceType = entry.Key.Substring(0, entry.Key.Length - (StrLits.Ref.Length + 1));
+
                 foreach (var referenceId in entry.Value)
                 {
                     GraphElement referencedElement = null;
                     if (_elementsByIdCollection.TryGetValue(referenceId, out referencedElement))
                     {
-                        referencedElement.AddInReference(entry.Key, element);
-                        element.AddOutReference(entry.Key, referencedElement);
+                        referencedElement.AddOutReference(referenceType, element);
+                        element.AddInReference(referenceType, referencedElement);
+                        
                     }
                 }
             }
 
             foreach (var entry in element.OutRefernceIdentifiers)
             {
+                // Type is the _Ref xml element minus the _Ref. (e.g. <Mother_Ref> => Mother)
+                var referenceType = entry.Key.Substring(0, entry.Key.Length - (StrLits.Ref.Length + 1));
+
                 foreach (var referenceId in entry.Value)
                 {
                     GraphElement referencedElement = null;
                     if (_elementsByIdCollection.TryGetValue(referenceId, out referencedElement))
                     {
-                        referencedElement.AddOutReference(entry.Key, element);
-                        element.AddInReference(entry.Key, referencedElement);
+                        referencedElement.AddInReference(referenceType, element);
+                        element.AddOutReference(referenceType, referencedElement);
                     }
                 }
             }
+        }
+
+        #endregion
+
+        #region Collection Interfaces
+
+        public IDictionary<string, GraphElement> Elements
+        {
+            get
+            {
+                return _elementsByIdCollection;
+            }
+            
+        }
+
+        public void Reset()
+        {
+            WorkspaceHasChangedSinceLastLoad = true;
+
+            // The pattern of clearing, set to null, then re-initialize is to
+            // elevate this variable as eligble for garbage collection
+            //
+            if (_elementsByIdCollection != null)
+            {
+                _elementsByIdCollection.Clear();
+            }
+            _elementsByIdCollection = null;
+            _elementsByIdCollection = new ConcurrentDictionary<string, GraphElement>();
         }
 
         #endregion

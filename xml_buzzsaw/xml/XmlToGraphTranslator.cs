@@ -14,10 +14,14 @@ namespace xml_buzzsaw.xml
         /// <summary>
         /// Translates a folder structure of xml to GraphElements
         /// </summary>
+        /// <param name="logger"></param>
         /// <param name="topLevelFolder"></param>
         /// <param name="concurrentCollection"></param>
-        public static void TranslateToCache(string topLevelFolder, ConcurrentDictionary<string, GraphElement> concurrentCollection)
+        public static bool TranslateToCache(ILogger logger, string topLevelFolder, 
+            ConcurrentDictionary<string, GraphElement> concurrentCollection)
         {
+            bool errorsFound = false;
+
             // In parallel, process each file in a folder structure
             //
             FileSystemUtils.TraverseTreeParallelForEach(topLevelFolder, (filePath) => 
@@ -32,16 +36,22 @@ namespace xml_buzzsaw.xml
                     //
                     foreach (var element in extractedGraphXmlElements)
                     {
-                        concurrentCollection.TryAdd(element.Id, element);
+                        if (!concurrentCollection.TryAdd(element.Id, element))
+                        {
+                            errorsFound = true;
+                            logger.Error("3048", $"Encountered duplicate id '{element.Id}' in cache while processing file '{filePath}'");
+                        }
                     }
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
-                    // all exceptions are no-ops for now
-                    // TODO - impelement execptions.
+                    logger.Error("3054", $"Exception occurred while processing file '{filePath}'. Exception: {e.Message}");
+                    errorsFound = true;
                 }
 
             });
+
+            return !errorsFound;
         }
 
         private static List<GraphElement> ProcessFile(string filePath)
@@ -70,7 +80,7 @@ namespace xml_buzzsaw.xml
                         //
                         // This can be made configurable by allowing the user to specify an xpath condition to specify this.
                         //
-                        if (!xmlChild.Name.LocalName.EndsWith(StrLits.Ref))
+                        if (xmlChild.Name.LocalName.EndsWith(StrLits.Ref))
                         {
                             var referenceId = xmlChild.Attribute(StrLits.RefId);
                             var referenceDirection = xmlChild.Attribute(StrLits.RefDirection);

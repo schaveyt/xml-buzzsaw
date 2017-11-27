@@ -81,26 +81,26 @@ namespace xml_buzzsaw.utils
                 // synchronously but this could be modified to perform async I/O.
                 try
                 {
-                    if (files.Length < procCount)
-                    {
+                    // if (files.Length < procCount)
+                    // {
                         foreach (var file in files)
                         {
                             action(file);
                             fileCount++;
                         }
-                    }
-                    else
-                    {
-                        Parallel.ForEach(files, () => 0, (file, loopState, localCount) =>
-                                                     {
-                                                         action(file);
-                                                         return (int)++localCount;
-                                                     },
-                                         (c) =>
-                                         {
-                                             Interlocked.Add(ref fileCount, c);
-                                         });
-                    }
+                    // }
+                    // else
+                    // {
+                    //     Parallel.ForEach(files, () => 0, (file, loopState, localCount) =>
+                    //                                  {
+                    //                                      action(file);
+                    //                                      return (int)++localCount;
+                    //                                  },
+                    //                      (c) =>
+                    //                      {
+                    //                          Interlocked.Add(ref fileCount, c);
+                    //                      });
+                    // }
                 }
                 catch (AggregateException ae)
                 {

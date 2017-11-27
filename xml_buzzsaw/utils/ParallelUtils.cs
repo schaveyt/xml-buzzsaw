@@ -28,19 +28,19 @@ namespace xml_buzzsaw.utils
             //
             try
             {
-                if (cache.Count < procCount)
-                {
+                // if (cache.Count < procCount)
+                // {
                     foreach (var item in cache.Values)
                     {
                         action(item);
                     }
-                }
-                else
-                {
-                    Parallel.ForEach(cache.Values, (item) => {
-                        action(item);
-                    });
-                }
+                // }
+                // else
+                // {
+                //     Parallel.ForEach(cache.Values, (item) => {
+                //         action(item);
+                //     });
+                // }
             }
             catch (Exception e)
             {
